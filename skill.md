@@ -79,20 +79,22 @@ A mini Ask Ellie clone:
 - Local JSON for mock data
 - Real git commands via subprocess
 
-### Project Structure (Target)
+### Project Structure
 ```
 kitty/
-├── main.py              # Entry point
-├── agents/
-│   ├── router.py        # Query classification
-│   └── kitty_agent.py   # Main agent
+├── main.py              # Entry point + graph wiring
+├── agent/
+│   ├── state.py         # AgentState + ClassificationState
+│   ├── router.py        # Query classification + routing
+│   ├── git_agent.py     # Git specialist agent
+│   ├── code_agent.py    # Code search agent
+│   └── ticket_agent.py  # Ticket search agent
 ├── tools/
-│   ├── code_tools.py    # Code search, file read
-│   ├── ticket_tools.py  # Ticket search
-│   └── git_tools.py     # Git log, blame
+│   ├── code_tools.py    # grep subprocess
+│   ├── tickets_tool.py  # JSON search with chaining filters
+│   └── git_tools.py     # git log subprocess
 ├── data/
-│   ├── tickets.json     # Mock tickets
-│   └── team.json        # Mock team
+│   └── ticket.json      # Mock Jira tickets
 └── pyproject.toml
 ```
 
@@ -100,22 +102,23 @@ kitty/
 
 ## Progress Tracking
 
-### Phase 1: Foundation ⬜
-- [ ] Project setup (uv init, deps)
-- [ ] Single agent with one hardcoded tool
-- [ ] Invoke and get response
+### Phase 1: Foundation ✅
+- [x] Project setup (uv init, deps)
+- [x] Single agent with one hardcoded tool
+- [x] Invoke and get response
 
-### Phase 2: Tools ⬜
-- [ ] search_tickets tool (reads JSON)
-- [ ] git_log tool (subprocess)
-- [ ] search_code tool (basic file search)
+### Phase 2: Tools ✅
+- [x] search_tickets tool (reads JSON, chaining filters)
+- [x] git_log tool (subprocess, author + limit params)
+- [x] search_code tool (grep subprocess)
 
-### Phase 3: Router ⬜
-- [ ] Classify query intent
-- [ ] Route to appropriate tools
+### Phase 3: Router ✅
+- [x] Classify query intent (LLM-based with structured output)
+- [x] Route to appropriate specialized agents (conditional edges)
+- [x] LangGraph StateGraph with AgentState
 
-### Phase 4: Multi-Agent (Stretch) ⬜
-- [ ] Separate agents per domain
+### Phase 4: Multi-Agent ✅
+- [x] Separate agents per domain (git, code, tickets)
 - [ ] PnE for complex queries
 
 ---
