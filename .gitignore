@@ -11,3 +11,6 @@ wheels/
 
 #Envirnomental Variables
 .env
+
+#skill files
+skill.md
