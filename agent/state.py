@@ -8,4 +8,4 @@ class AgentState(TypedDict):
 
 class ClassificatonState(TypedDict):
     """Routing classification on what agent to be called"""
-    source: Literal["git", "linear"]
+    source: Literal["git", "linear", "briefs"]

@@ -4,8 +4,6 @@ from tools.github_tools import git_commits, git_pull_requests
 
 def git_agent(state:AgentState) -> dict:
     
-    print(f"Agent state at Git {state}")
-    print(f"Agent is here {state}")
     agent = create_agent(
         model="gpt-3.5-turbo", 
         system_prompt="""

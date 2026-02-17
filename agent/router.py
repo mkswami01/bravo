@@ -8,6 +8,7 @@ SYSTEM_PROMPT = """
         Categories:
         - git: commits, pushes, history, changes, who wrote what
         - linear: issues, bugs, tasks, assignments, status, who's working on what
+        - briefs: daily updates, 
 
         Examples:
         - "What did Sarah commit?" → git
@@ -16,8 +17,10 @@ SYSTEM_PROMPT = """
         - "What is divya working on ?" → linear
         - "Who pushed to main today?" → git
         - "What's assigned to Alex?" → linear
+        - "Give me a daily breif" → breifs
+        - "what work was completed yesterday" → briefs
 
-        Respond with exactly one word: git or linear
+        Respond with exactly one word: git or linear or briefs
         """
 
 agent = create_agent(
@@ -38,5 +41,5 @@ def classify_query(state: AgentState) -> ClassificatonState:
     return {"source": response["structured_response"]["source"]}
 
 
-def routing_condition(state:ClassificatonState) -> Literal["git", "linear"]:
+def routing_condition(state:ClassificatonState) -> Literal["git", "linear", "briefs"]:
     return state["source"]
