@@ -1,45 +1,57 @@
-
-from sqlite3 import Date
 from langchain.tools import tool
 import requests
 import os
 from dotenv import load_dotenv
-load_dotenv() 
+
+from datetime import datetime, timezone, timedelta
 
 base_url = f"https://api.github.com/"
 
 @tool
-def git_commits(author: str = None) -> list:
+def git_commits(author: str = None, daily_briefs: bool = False) -> list:
 
     """
         Fetch the git commit for repo and author matching query
 
         Args:
-            repo : repository in the github 
             author : Engineer name who is responsible for commit
+            daily_briefs : This is set to True only for getting daily breifs - last day works
+
+        List:
+            Return lists of commits baed on the filters
     """
     headers = {"Authorization":f"token {os.getenv('GITHUB_API_FINE_GRAIN_ACCESS')}"}
     
     url = base_url+"repos/mkswami01/bravo/commits"
-    parameter = {}
-    if author is None:
-        return []
+    params = {}
 
-    response = requests.get(url, headers=headers)
+    if author:
+        params["author"] = author
+    if daily_briefs:
+        params["since"] = get_date()
+
+    response = requests.get(url, headers=headers, params=params)
     commits = response.json()
-
-    print(f"Commits as json\n{commits}")
-
     
     if author:
         commits = [c for c in commits if author.lower() in c["commit"]["author"]["name"].lower()] 
 
-    print(f"Commits {commits}")
 
-    return commits
+    
+    # Return only essential fields for agent consumption
+    return [
+        {
+            "author": c["commit"]["author"]["name"],
+            "email": c["commit"]["author"]["email"],
+            "commit_date": c["commit"]["author"]["date"],
+            "commit_message": c["commit"]["message"],
+            "url": c["html_url"]
+        }
+        for c in commits
+    ]
 
 @tool
-def git_pull_requests(state: str = "open") -> list:
+def git_pull_requests(state: str = "open", daily_briefs: bool = False) -> list:
 
     """
     Fetch GitHub pull requests for mkswami01/bravo repo.
@@ -59,12 +71,15 @@ def git_pull_requests(state: str = "open") -> list:
         "direction":"asc",
         "per_page":100
         }
+
+    if daily_briefs:
+        params["since"] = get_date()
     
     try:
-
         response = requests.get(url, headers=headers, params=params, timeout=10)
         response.raise_for_status() 
         pr_list = response.json()
+
 
         # Return only essential fields for agent consumption
         return [
@@ -80,6 +95,7 @@ def git_pull_requests(state: str = "open") -> list:
     except requests.exceptions.RequestException as e:
         return [{"error": f"Failed to fetch PRs: {str(e)}"}]
 
-#get_pull_requests("all")
-
-#get_commits("dsalian")
+def get_date():
+    yesterday = datetime.now(timezone.utc) - timedelta(days=1)
+    yesterday = yesterday.replace(hour=0, minute=0, second=0, microsecond=0)
+    return yesterday.strftime("%Y-%m-%dT%H:%M:%SZ")
