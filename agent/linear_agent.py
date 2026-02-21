@@ -6,7 +6,6 @@ from langchain.agents import create_agent
 
 def linear_agent(state:AgentState) -> dict:
 
-    print(f"Agent state at Linear {state}")
     agent = create_agent(
         model="gpt-3.5-turbo",
         system_prompt= """
