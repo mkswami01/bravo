@@ -8,7 +8,8 @@ SYSTEM_PROMPT = """
         Categories:
         - git: commits, pushes, history, changes, who wrote what
         - linear: issues, bugs, tasks, assignments, status, who's working on what
-        - briefs: daily updates, 
+        - briefs: daily updates
+        - planner: complex queries
 
         Examples:
         - "What did Sarah commit?" → git
@@ -19,6 +20,8 @@ SYSTEM_PROMPT = """
         - "What's assigned to Alex?" → linear
         - "Give me a daily breif" → breifs
         - "what work was completed yesterday" → briefs
+        - what work is assigned to Divya ? and How many Pull request did she take care ? → planner
+
 
         Respond with exactly one word: git or linear or briefs
         """
@@ -32,7 +35,6 @@ agent = create_agent(
 def classify_query(state: AgentState) -> ClassificatonState:
     """Classsify query and determine which agent to invoke"""
 
-    print(f"Agent states at query classifier {state}")
 
     response = agent.invoke(
         {"messages": [{"role":"user", "content":state["query"]}]}
