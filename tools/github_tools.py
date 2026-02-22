@@ -25,8 +25,6 @@ def git_commits(author: str = None, daily_briefs: bool = False) -> list:
     url = base_url+"repos/mkswami01/bravo/commits"
     params = {}
 
-    if author:
-        params["author"] = author
     if daily_briefs:
         params["since"] = get_date()
 
@@ -36,8 +34,6 @@ def git_commits(author: str = None, daily_briefs: bool = False) -> list:
     if author:
         commits = [c for c in commits if author.lower() in c["commit"]["author"]["name"].lower()] 
 
-
-    
     # Return only essential fields for agent consumption
     return [
         {
