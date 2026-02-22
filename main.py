@@ -8,31 +8,38 @@ from graph.react_graph import Agent
 
 
 def main():
+
+
+  while True:
+        query = input("Ask Bravo: I am your assistant, can fetch information about your engineers works")
+
+        if query.strip() == "":
+          pass
+        if query.lower() in ["quit", "exit"]:
+            break
   
-  state = ClassificationState(query="What was was recently completed by mkumar ? Does he have any tickets assigned ? In linear he might be referred to Manoj Kumar", domain="", complexity="")
+        state = ClassificationState(query=query, domain="", complexity="")
 
-  agent = Initializer()
-  state = agent.run(state)
+        agent = Initializer()
+        state = agent.run(state)
 
-  if state["complexity"] == "complex":
+        if state["complexity"] == "complex":
+          planner = PlannerState(query=state["query"], plan=[], results=[], result=[])
+          pne = PlanAndExecute()
+          final_state = pne.run(planner)
+          print(f"User query : {final_state['query']}")
 
-    planner = PlannerState(query=state["query"], plan=[], results=[], result=[])
-    pne = PlanAndExecute()
-    final_state = pne.run(planner)
-    print(f"User query : {final_state['query']}")
+          print(f"The plan executed was {final_state['plan']}")
 
-    print(f"The plan executed was {final_state['plan']}")
+          print(f"{final_state["result"]}")
 
-    print(f"{final_state["result"]}")
+        elif state ["complexity"] == "simple":
+          react_state = {"query": state["query"], "result": "", "domain": ""}
+          react_agent = Agent()
+          final_state = react_agent.run(react_state)
 
-  elif state ["complexity"] == "simple":
-
-    react_state = {"query": state["query"], "result": "", "domain": ""}
-    react_agent = Agent()
-    final_state = react_agent.run(react_state)
-
-    print(f"User query : {final_state['query']}")
-    print(f"{final_state["result"]}")
+          print(f"User query : {final_state['query']}")
+          print(f"{final_state["result"]}")
 
 if __name__ == "__main__":
     main()
