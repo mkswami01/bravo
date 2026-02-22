@@ -14,7 +14,7 @@ class PlanAndExecute:
         pne_builder.add_node("planner", plan_and_execute)
         pne_builder.add_edge(START, "planner")
         pne_builder.add_edge("planner", END)
-        self.graph = pne_builder.compile();
+        self.graph = pne_builder.compile()
         self.agent = Agent()
 
     def synthesize(self, results: list, state: PlannerState):
@@ -35,7 +35,7 @@ class PlanAndExecute:
         state["result"] = response.content
        
 
-    def plan_and_execute(self, planner_state: PlannerState):
+    def run(self, planner_state: PlannerState):
 
         response = self.graph.invoke(planner_state)
         self.plan = response["plan"]
