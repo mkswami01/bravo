@@ -1,13 +1,15 @@
 from ast import Dict
 from typing import List
 from langchain_openai import ChatOpenAI
-from agent.state import AgentState, PlannerState, Plan
+from agent.state import PlannerState, Plan
+from config.team import TEAM_ROSTER
 
 
 SYSTEM_PROMPT = f"""
 
     You are a planner agent, your job is the divide the completed query into mutiple steps.
     Each has one job to execute and collect information. 
+    Here is the team roaster {TEAM_ROSTER}
 
     You have access to the followings agents
     Github agent - Github Specialist with access to github tools
@@ -16,9 +18,8 @@ SYSTEM_PROMPT = f"""
     Examples:
     - What did divya work on recently ? does she have any issues assigned 
     [
-        "Get the list of commit completed divya",
-        "Fetch the pull request by divya",
-        "issues from linear for divya"
+        "Get commits by github user dsalian",
+        "Fetch Linear issues assigned to Divya krishan Salian"
     ]
 
 """
