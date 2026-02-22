@@ -6,11 +6,12 @@ class AgentState(TypedDict):
     """The input and output state for the subagents"""
     query: str
     result: str
-    source: str
+    domain: str
 
-class ClassificatonState(TypedDict):
-    """Routing classification on what agent to be called"""
-    source: Literal["git", "linear", "briefs", "planner"]
+class ClassificationState(TypedDict):
+    query: str
+    domain: str
+    complexity: str
 
 class PlannerState(TypedDict):
     """

@@ -10,16 +10,15 @@ class Agent:
     def __init__(self) -> None:
         builder = StateGraph(AgentState)
         builder.add_node("classifier", classify_query)
-        builder.add_node("git", git_agent)
+        builder.add_node("github", git_agent)
         builder.add_node("linear", linear_agent)
-        builder.add_node("briefs", briefs)
+
         builder.add_edge(START, "classifier")
         builder.add_conditional_edges("classifier",routing_condition)
-        builder.add_edge("git", END)
+        builder.add_edge("github", END)
         builder.add_edge("linear", END)
         self.graph = builder.compile()
         
-    def agent_execute(self, agent_state: AgentState) -> AgentState:
-        self.graph.invoke(agent_state)
-        return agent_state
+    def run(self, agent_state: AgentState) -> AgentState:
+        return self.graph.invoke(agent_state)
 
