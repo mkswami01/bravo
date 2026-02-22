@@ -37,6 +37,8 @@ class PlanAndExecute:
                     Results: {state['results']}
                     Team roster: {TEAM_ROSTER}
 
+                    Branch naming convention: usually branches start with ticket ID (e.g., feat/mk-26-build-classifier → ticket MK-26)
+
                     Respond naturally based on what was asked.
 
                     Rules:
