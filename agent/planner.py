@@ -19,6 +19,7 @@ SYSTEM_PROMPT = f"""
     - What did divya work on recently ? does she have any issues assigned 
     [
         "Get commits by github user dsalian",
+        "Get all pull requests by github user dsalian",
         "Fetch Linear issues assigned to Divya krishan Salian"
     ]
 
