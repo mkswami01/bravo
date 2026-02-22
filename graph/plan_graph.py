@@ -5,6 +5,7 @@ from agent import planner
 from agent.planner import plan_and_execute
 from agent.router import agent
 from agent.state import AgentState, PlannerState
+from config.team import TEAM_ROSTER
 from graph.react_graph import Agent
 
 class PlanAndExecute:
@@ -13,30 +14,44 @@ class PlanAndExecute:
         pne_builder = StateGraph(PlannerState)
         pne_builder.add_node("planner", plan_and_execute)
         pne_builder.add_node("execute", self.execute)
+        pne_builder.add_node("synthesize", self.synthesize)
 
         pne_builder.add_edge(START, "planner")
         pne_builder.add_edge("planner", "execute")
-        pne_builder.add_edge("execute", END)
+        pne_builder.add_edge("execute", "synthesize")
+        pne_builder.add_edge("synthesize", END)
 
         self.graph = pne_builder.compile()
         self.agent = Agent()
 
-    def synthesize(self, results: list, state: PlannerState):
+    def synthesize(self, state: PlannerState):
 
         agent = ChatOpenAI(
             model="gpt-4o"
         )
 
         SYSTEM_PROMPT = f"""
-            The plan and execute agent have collected all the information together for the {state["query"]}
+                    You are an engineering team analyst. 
 
-            Here is all the information collections - {results}
-            your jobs is the summarize and give a breif intro about the work and keep all teh details as much as you can 
-        """
+                    Query: {state["query"]}
+                    Results: {state['results']}
+                    Team roster: {TEAM_ROSTER}
+
+                    Respond naturally based on what was asked.
+
+                    Rules:
+                        - Include links to PRs, commits, and tickets when available
+                        - End with "Action Items" — what needs attention, prioritized by urgency
+                        - Include metrics: count commits, PRs merged, tickets closed
+                        - Use status indicators: ✓ for done, ⚠️ for needs attention, 🔴 for blocked
+                        - Flag stale PRs, unassigned tickets, or missing cross-references
+                        - Be concise. No filler. Every sentence should add information.
+                        - Cross-reference GitHub and Linear data always.
+                    """
         messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": "Please summarize the above."}]
         response = agent.invoke(messages)
 
-        state["result"] = response.content
+        return {"result": response.content}
        
 
     def run(self, pne_state: PlannerState):

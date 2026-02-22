@@ -20,7 +20,10 @@ def main():
     pne = PlanAndExecute()
     final_state = pne.run(planner)
     print(f"User query : {final_state['query']}")
-    print(f"{final_state["results"]}")
+
+    print(f"The plan executed was {final_state['plan']}")
+
+    print(f"{final_state["result"]}")
 
   elif state ["complexity"] == "simple":
 
