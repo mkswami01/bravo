@@ -1,14 +1,12 @@
 from langchain.tools import tool
 import requests
 import os
-from dotenv import load_dotenv
-
 from datetime import datetime, timezone, timedelta
 
 base_url = f"https://api.github.com/"
 
 @tool
-def git_commits(author: str = None, daily_briefs: bool = False) -> list:
+def git_commits(author: str = None, daily_briefs: bool = True) -> list:
 
     """
         Fetch the git commit for repo and author matching query
@@ -47,13 +45,14 @@ def git_commits(author: str = None, daily_briefs: bool = False) -> list:
     ]
 
 @tool
-def git_pull_requests(state: str = "open", daily_briefs: bool = False) -> list:
+def git_pull_requests(state: str = "open", daily_briefs: bool = True) -> list:
 
     """
     Fetch GitHub pull requests for mkswami01/bravo repo.
     
     Args:
-        state: Filter by "open", "closed", or "all" (default: "open")
+        state: "open", "closed", or "all" (default: "open"). 
+           Use "all" to include merged/closed PRs.
     
     Returns:
         List of PR dicts with title, number, html_url, state, and updated_at.
@@ -76,20 +75,81 @@ def git_pull_requests(state: str = "open", daily_briefs: bool = False) -> list:
         response.raise_for_status() 
         pr_list = response.json()
 
-
-        # Return only essential fields for agent consumption
-        return [
-            {
+        updates = []
+        for pr in pr_list:
+            pr_details = get_pr_details(pr["number"])
+            code_change = get_code_changes(pr["number"])
+            update = {
                 "number": pr["number"],
                 "title": pr["title"],
                 "html_url": pr["html_url"],
                 "state": pr["state"],
-                "updated_at": pr["updated_at"]
+                "updated_at": pr["updated_at"],
+                "branch": pr["head"]["ref"],
+                "author": pr["user"]["login"],
+                "pr_details": pr_details,
+                "code_changes": code_change
             }
-            for pr in pr_list
-        ]
+            updates.append(update)
+
+        # Return only essential fields for agent consumption
+        return updates
     except requests.exceptions.RequestException as e:
         return [{"error": f"Failed to fetch PRs: {str(e)}"}]
+
+
+def get_pr_details(pull_id : int) -> list:
+
+    headers = {"Authorization":f"token {os.getenv('GITHUB_API_FINE_GRAIN_ACCESS')}"}
+    url = base_url+f"/repos/mkswami01/bravo/pulls/{pull_id}"
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status() 
+        pr = response.json()
+
+        pr_details = {
+            "additions": pr.get("additions", 0),    # new
+            "deletions": pr.get("deletions", 0),    # new
+            "changed_files": pr.get("changed_files", 0), 
+        }
+        print(pr_details)
+
+        # Return only essential fields for agent consumption
+        return[]
+    except requests.exceptions.RequestException as e:
+        return [{"error": f"Failed to fetch PRs: {str(e)}"}]
+
+
+def get_code_changes(pull_id : int) -> list:
+
+    headers = {"Authorization":f"token {os.getenv('GITHUB_API_FINE_GRAIN_ACCESS')}"}
+    url = base_url+f"/repos/mkswami01/bravo/pulls/{pull_id}/files"
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status() 
+        files = response.json()
+        
+        changes = []
+        
+        for file in files:
+            change = {
+                "filename":file["filename"],
+                "status":file["status"],
+                "addition":file["additions"],
+                "deletion":file["deletions"],
+                "changes":file["changes"]
+            }
+            changes.append(change)
+
+        print(changes)
+
+        # Return only essential fields for agent consumption
+        return[]
+    except requests.exceptions.RequestException as e:
+        return [{"error": f"Failed to fetch PRs: {str(e)}"}]
+
 
 def get_date():
     yesterday = datetime.now(timezone.utc) - timedelta(days=1)
