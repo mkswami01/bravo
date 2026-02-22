@@ -3,7 +3,7 @@ from agent.state import AgentState
 from tools.github_tools import git_commits, git_pull_requests
 
 def git_agent(state:AgentState) -> dict:
-    
+
     agent = create_agent(
         model="gpt-3.5-turbo", 
         system_prompt="""
@@ -14,5 +14,4 @@ def git_agent(state:AgentState) -> dict:
     )
 
     response = agent.invoke({"messages": [{"role":"user", "content":state["query"]}]})
-    
     return {"result":response["messages"][-1].content}
