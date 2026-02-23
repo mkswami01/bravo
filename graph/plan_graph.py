@@ -1,12 +1,11 @@
-from unittest import result
 from langchain_openai import ChatOpenAI
 from langgraph.graph.state import END, START, StateGraph
 from agent import planner
 from agent.planner import plan_and_execute
-from agent.router import agent
-from agent.state import AgentState, PlannerState
+from agent.state import PlannerState
 from config.team import TEAM_ROSTER
 from graph.react_graph import Agent
+from rich.console import Console
 
 class PlanAndExecute:
 
@@ -23,13 +22,15 @@ class PlanAndExecute:
 
         self.graph = pne_builder.compile()
         self.agent = Agent()
+        self.console = Console()
 
     def synthesize(self, state: PlannerState):
 
         agent = ChatOpenAI(
             model="gpt-4o"
         )
-
+        
+        self.console.print("Synthesizing...", style="yellow")
         SYSTEM_PROMPT = f"""
                     You are an engineering team analyst. 
 
@@ -64,6 +65,9 @@ class PlanAndExecute:
 
         results = []
         for i, step in enumerate(pne_state["plan"]):
+            self.console.print(f"⚡ Executing step {i+1}/{len(pne_state["plan"])}", style="yellow")
+            self.console.print(f"{step}")
+
             react_state = {"query": step, "result": "", "domain": ""}
             react_agent = Agent()
             final_state = react_agent.run(react_state)

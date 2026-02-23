@@ -1,9 +1,10 @@
-from ast import Dict
-from typing import List
 from langchain_openai import ChatOpenAI
 from agent.state import PlannerState, Plan
 from config.team import TEAM_ROSTER
+from rich.console import Console
 
+
+console = Console()
 
 SYSTEM_PROMPT = f"""
 
