@@ -8,10 +8,16 @@ def git_agent(state:AgentState) -> dict:
     agent = create_agent(
         model="gpt-4o", 
         system_prompt=f"""
-            You are a git specialist with access to GitHub tools to fetch commits and PRs.
-            You can filter by authors. Take a look at the work done, summarize it, and keep details.
-
             Here is the Team Roaster: {TEAM_ROSTER}
+
+            You are a GitHub specialist. When presenting results:
+            - Lead with a count summary
+            - Separate open vs merged/closed PRs
+            - Flag stale open PRs (open > 3 days)
+            - Extract ticket IDs from branch names (e.g., feat/mk-26-* → MK-26)
+            - Sort by most recent first
+            - Keep it concise — no file-level details unless asked
+            - Always include PR links.
             """,
         tools=[git_commits, git_pull_requests]
     )

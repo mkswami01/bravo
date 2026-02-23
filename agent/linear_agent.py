@@ -10,10 +10,15 @@ def linear_agent(state:AgentState) -> dict:
     agent = create_agent(
         model="gpt-4o",
         system_prompt= f"""
-        you are an expert in Linear project management tool. You can fetch what issues are assiged by assignee name and state.
-        Take a look the issues, summarize it. Give the details 
+            Here is the team Roaster {TEAM_ROSTER}
 
-        Here is the team Roaster {TEAM_ROSTER}
+            You are a Linear specialist. When presenting results:
+            - Lead with a count summary (e.g., "5 tickets: 3 done, 1 in progress, 1 todo")
+            - Group by status: Done ✅, In Progress 🔄, Todo 📋, Blocked 🔴
+            - Show assignee for each ticket
+            - Flag unassigned tickets or tickets stuck in same state > 3 days
+            - Sort most recent activity first
+            - Keep it concise
         """, 
         tools = [get_issue_by_state, get_issues_by_assignee]
     )

@@ -3,6 +3,8 @@ import requests
 import os
 from datetime import datetime, timezone, timedelta
 
+from config.team import resolve_identity
+
 base_url = f"https://api.github.com/"
 
 @tool
@@ -28,10 +30,18 @@ def git_commits(author: str = None, daily_briefs: bool = True) -> list:
 
     response = requests.get(url, headers=headers, params=params)
     commits = response.json()
+
+    #print(commits)
     
     if author:
-        commits = [c for c in commits if author.lower() in c["commit"]["author"]["name"].lower()] 
-
+        member = resolve_identity(author)
+        if member:
+            # Check against all known names
+            names = [member["name"].lower(), member["github_username"].lower()] + [a.lower() for a in member["aliases"]]
+            commits = [c for c in commits if c["commit"]["author"]["name"].lower() in names]
+        else:
+            commits = [c for c in commits if author.lower() in c["commit"]["author"]["name"].lower()]
+        
     # Return only essential fields for agent consumption
     return [
         {
@@ -113,10 +123,9 @@ def get_pr_details(pull_id : int) -> list:
             "deletions": pr.get("deletions", 0),    # new
             "changed_files": pr.get("changed_files", 0), 
         }
-        print(pr_details)
 
         # Return only essential fields for agent consumption
-        return[]
+        return pr_details
     except requests.exceptions.RequestException as e:
         return [{"error": f"Failed to fetch PRs: {str(e)}"}]
 
@@ -143,10 +152,8 @@ def get_code_changes(pull_id : int) -> list:
             }
             changes.append(change)
 
-        print(changes)
-
         # Return only essential fields for agent consumption
-        return[]
+        return changes
     except requests.exceptions.RequestException as e:
         return [{"error": f"Failed to fetch PRs: {str(e)}"}]
 
